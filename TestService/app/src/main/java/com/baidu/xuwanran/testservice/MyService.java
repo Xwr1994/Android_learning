@@ -37,4 +37,8 @@ public class MyService extends Service {
     public IBinder onBind(Intent intent) {
         return mMessenger.getBinder();
     }
+
+    public void testgit(){
+
+    }
 }
