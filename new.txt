@@ -3,3 +3,4 @@ first step
 git is a version control system
 control 4
 Create a new branch "dev"
+Creating a new branch is quick AND simple.
