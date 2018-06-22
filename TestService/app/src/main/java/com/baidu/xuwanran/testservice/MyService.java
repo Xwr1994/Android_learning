@@ -38,7 +38,4 @@ public class MyService extends Service {
         return mMessenger.getBinder();
     }
 
-    public void testgit(){
-
-    }
 }
