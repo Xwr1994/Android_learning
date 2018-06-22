@@ -3,13 +3,19 @@ package com.baidu.xuwanran.geoquiz;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.text.NumberFormat;
+
 public class QuizActivity extends AppCompatActivity {
+    private static final String TAG = "QuizActivity";
+    private static final String KEY_INDEX = "index";
+
     private Button mTrueButton;
     private Button mFalseButton;
     private ImageButton mNextButton;
@@ -26,11 +32,18 @@ public class QuizActivity extends AppCompatActivity {
     };
 
     private int mCurrentIndex = 0;
+    private int numOfAnswer = 0;
+    private int numOfRight = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_quiz);
+        Log.d(TAG,"OnCreate Called");
+
+        if(savedInstanceState != null){
+            mCurrentIndex = savedInstanceState.getInt(KEY_INDEX);
+        }
 
         mQuestionTextView = (TextView) findViewById(R.id.question_text_view);
         mQuestionTextView.setOnClickListener(new View.OnClickListener() {
@@ -50,6 +63,8 @@ public class QuizActivity extends AppCompatActivity {
                 //toast.setGravity(Gravity.TOP,0,0);
                 //toast.show();
                 checkAnswer(true);
+                mQuestionBank[mCurrentIndex].setHasAnswer(true);
+                setButtonClickable();
             }
         });
 
@@ -58,6 +73,8 @@ public class QuizActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 checkAnswer(false);
+                mQuestionBank[mCurrentIndex].setHasAnswer(true);
+                setButtonClickable();
             }
         });
 
@@ -87,9 +104,47 @@ public class QuizActivity extends AppCompatActivity {
         updateQuestion();
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        Log.d(TAG,"OnStart Called");
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        Log.d(TAG,"OnPause Called");
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d(TAG,"OnResume Called");
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        Log.d(TAG,"OnStop Called");
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d(TAG,"OnDestory Called");
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        Log.d(TAG,"OnSaveInstanceState Called");
+        outState.putInt(KEY_INDEX,mCurrentIndex);
+    }
+
     private void updateQuestion(){
         int question = mQuestionBank[mCurrentIndex].getmTextResId();
         mQuestionTextView.setText(question);
+        setButtonClickable();
     }
 
     private void checkAnswer(boolean userPressedTrue){
@@ -99,10 +154,30 @@ public class QuizActivity extends AppCompatActivity {
 
         if(userPressedTrue == answerIsTrue){
             messageResId = R.string.correct_toast;
+            numOfRight = numOfRight + 1;
+            numOfAnswer = numOfAnswer + 1;
         }else {
             messageResId = R.string.incorrect_toast;
+            numOfAnswer = numOfAnswer + 1;
         }
 
         Toast.makeText(QuizActivity.this,messageResId,Toast.LENGTH_SHORT).show();
+
+        if(numOfAnswer == mQuestionBank.length){
+            double rightratio = (double) numOfRight/(double) numOfAnswer;
+            NumberFormat nt = NumberFormat.getPercentInstance();
+            nt.setMinimumFractionDigits(2);
+            Toast.makeText(QuizActivity.this,"Your Answer Correct Ratio is" + nt.format(rightratio),Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void setButtonClickable(){
+        if(mQuestionBank[mCurrentIndex].isHasAnswer() == true){
+            mTrueButton.setEnabled(false);
+            mFalseButton.setEnabled(false);
+        }else {
+            mTrueButton.setEnabled(true);
+            mFalseButton.setEnabled(true);
+        }
     }
 }

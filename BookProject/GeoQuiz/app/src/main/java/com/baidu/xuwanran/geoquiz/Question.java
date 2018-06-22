@@ -7,10 +7,12 @@ package com.baidu.xuwanran.geoquiz;
 public class Question {
     private int mTextResId;
     private boolean mAnswerTrue;
+    private boolean mhasAnswer;
 
     public Question(int textResId, boolean answerTrue){
-        mTextResId = textResId;
-        mAnswerTrue = answerTrue;
+        this.mTextResId = textResId;
+        this.mAnswerTrue = answerTrue;
+        this.mhasAnswer = false;
     }
 
     public int getmTextResId() {
@@ -28,4 +30,13 @@ public class Question {
     public void setmAnswerTrue(boolean mAnswerTrue) {
         this.mAnswerTrue = mAnswerTrue;
     }
+
+    public boolean isHasAnswer() {
+        return mhasAnswer;
+    }
+
+    public void setHasAnswer(boolean hasAnswer) {
+        this.mhasAnswer = hasAnswer;
+    }
 }
+
