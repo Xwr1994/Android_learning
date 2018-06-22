@@ -35,16 +35,16 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal">
 
-        <Button
+        <ImageButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/prev_button"
-            android:text="@string/prev_button"/>
+            android:src="@drawable/arrow_left"/>
 
-        <Button
+        <ImageButton
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:id="@+id/next_button"
-            android:text="@string/next_button"/>
+            android:src="@drawable/arrow_right"/>
     </LinearLayout>
 </LinearLayout>
