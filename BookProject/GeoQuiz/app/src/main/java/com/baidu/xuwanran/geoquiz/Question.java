@@ -1,9 +1,5 @@
 package com.baidu.xuwanran.geoquiz;
 
-/**
- * Created by xuwanran on 2018/6/21.
- */
-
 public class Question {
     private int mTextResId;
     private boolean mAnswerTrue;

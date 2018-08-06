@@ -1,5 +1,6 @@
 package com.baidu.xuwanran.geoquiz;
 
+import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
@@ -15,9 +16,13 @@ import java.text.NumberFormat;
 public class QuizActivity extends AppCompatActivity {
     private static final String TAG = "QuizActivity";
     private static final String KEY_INDEX = "index";
+    private static final String KEY_NUM_OF_ANSWER = "numOfAnswer";
+    private static final String KEY_NUM_OF_RIGHT = "numOfRight";
+    private static final int REQUEST_CODE_CHEAT = 0;
 
     private Button mTrueButton;
     private Button mFalseButton;
+    private Button mCheatButton;
     private ImageButton mNextButton;
     private ImageButton mPrevButton;
     private TextView mQuestionTextView;
@@ -34,12 +39,13 @@ public class QuizActivity extends AppCompatActivity {
     private int mCurrentIndex = 0;
     private int numOfAnswer = 0;
     private int numOfRight = 0;
+    private boolean mIsCheater = false;
+    private int mCheatRemainNum = -1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_quiz);
-        Log.d(TAG,"OnCreate Called");
 
         if(savedInstanceState != null){
             mCurrentIndex = savedInstanceState.getInt(KEY_INDEX);
@@ -100,45 +106,63 @@ public class QuizActivity extends AppCompatActivity {
                 updateQuestion();
             }
         });
-
         updateQuestion();
+
+        mCheatButton = (Button) findViewById(R.id.cheat_button);
+        mCheatButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                boolean answerIsTrue = mQuestionBank[mCurrentIndex].ismAnswerTrue();
+                Intent intent = CheatActivity.newIntent(QuizActivity.this, answerIsTrue, mCheatRemainNum);
+                startActivityForResult(intent,REQUEST_CODE_CHEAT);
+            }
+        });
     }
 
     @Override
     protected void onStart() {
         super.onStart();
-        Log.d(TAG,"OnStart Called");
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        Log.d(TAG,"OnPause Called");
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        Log.d(TAG,"OnResume Called");
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        Log.d(TAG,"OnStop Called");
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Log.d(TAG,"OnDestory Called");
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        Log.d(TAG,"OnSaveInstanceState Called");
         outState.putInt(KEY_INDEX,mCurrentIndex);
+        outState.putInt(KEY_NUM_OF_ANSWER,numOfAnswer);
+        outState.putInt(KEY_NUM_OF_RIGHT,numOfRight);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        switch (requestCode){
+            case REQUEST_CODE_CHEAT:
+                if(resultCode == AppCompatActivity.RESULT_OK){
+                    mIsCheater = CheatActivity.wasAnswerShown(data);
+                    mCheatRemainNum = CheatActivity.getCheatRemainNum(data);
+                }
+                break;
+            default:
+        }
     }
 
     private void updateQuestion(){
@@ -152,13 +176,18 @@ public class QuizActivity extends AppCompatActivity {
 
         int messageResId = 0;
 
-        if(userPressedTrue == answerIsTrue){
-            messageResId = R.string.correct_toast;
-            numOfRight = numOfRight + 1;
+        if(mIsCheater){
+            messageResId = R.string.judgment_toast;
             numOfAnswer = numOfAnswer + 1;
         }else {
-            messageResId = R.string.incorrect_toast;
-            numOfAnswer = numOfAnswer + 1;
+            if(userPressedTrue == answerIsTrue){
+                messageResId = R.string.correct_toast;
+                numOfRight = numOfRight + 1;
+                numOfAnswer = numOfAnswer + 1;
+            }else {
+                messageResId = R.string.incorrect_toast;
+                numOfAnswer = numOfAnswer + 1;
+            }
         }
 
         Toast.makeText(QuizActivity.this,messageResId,Toast.LENGTH_SHORT).show();
@@ -167,7 +196,11 @@ public class QuizActivity extends AppCompatActivity {
             double rightratio = (double) numOfRight/(double) numOfAnswer;
             NumberFormat nt = NumberFormat.getPercentInstance();
             nt.setMinimumFractionDigits(2);
-            Toast.makeText(QuizActivity.this,"Your Answer Correct Ratio is" + nt.format(rightratio),Toast.LENGTH_SHORT).show();
+            if(mIsCheater){
+                Toast.makeText(QuizActivity.this,"You are Cheater! Your Ratio is 0.00%",Toast.LENGTH_SHORT).show();
+            }else {
+                Toast.makeText(QuizActivity.this,"Your Answer Correct Ratio is" + nt.format(rightratio),Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
